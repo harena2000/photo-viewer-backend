@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     # third app
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
-    'corsheaders'
+    'corsheaders',
+    "explorer"
 ]
 
 MIDDLEWARE = [
