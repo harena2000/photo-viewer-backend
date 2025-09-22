@@ -20,6 +20,8 @@ local_settings.py
 .env
 *.env
 
+/venv/
+
 # VS Code
 .vscode/
 
