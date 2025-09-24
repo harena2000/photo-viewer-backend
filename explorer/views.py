@@ -1,43 +1,41 @@
-from django.shortcuts import render
-from environs import Env
-
-import os
-from pathlib import Path
-from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
-ROOT_FOLDER = Path("/app/project")
-
-env = Env()
-env.read_env()
+from django.core.paginator import Paginator
+from .models import WatchedFolder
 
 class ListFiles(APIView):
     def get(self, request):
-        """
-        List all files and folders in ROOT_FOLDER.
-        Optional query parameter:
-        - path: relative path inside ROOT_FOLDER to explore subfolders
-        """
         try:
-            relative_path = request.query_params.get("path", "")
-            folder_to_list = ROOT_FOLDER / relative_path
-            print(folder_to_list)
+            page = int(request.query_params.get("page", 1))
+            page_size = int(request.query_params.get("page_size", 10))
 
-            if not folder_to_list.exists() or not folder_to_list.is_dir():
-                return Response({"error": "Folder does not exist"}, status=404)
+            # Query all folders from DB
+            folders = WatchedFolder.objects.all().order_by("name")
 
-            files = []
-            for entry in folder_to_list.iterdir():
-                files.append({
-                    "name": entry.name,
-                    "type": "folder" if entry.is_dir() else "file"
+            # Pagination
+            paginator = Paginator(folders, page_size)
+            paged_folders = paginator.get_page(page)
+
+            # Serialize folders
+            files_data = []
+            for folder in paged_folders:
+                files_data.append({
+                    "name": folder.name,
+                    "completed": folder.completed,
+                    "pan_file": folder.pan_file,
+                    "created_at": folder.created_at,
                 })
 
             return Response({
-                "current_path": str(folder_to_list.relative_to(ROOT_FOLDER)),
-                "full_path": env.str('BACKEND_URL') + settings.MEDIA_URL + str(folder_to_list.relative_to(ROOT_FOLDER)),
-                "files": files
+                "projects": files_data,
+                "pagination": {
+                    "page": paged_folders.number,
+                    "page_size": page_size,
+                    "total_pages": paginator.num_pages,
+                    "total_items": paginator.count,
+                    "has_next": paged_folders.has_next(),
+                    "has_previous": paged_folders.has_previous(),
+                }
             })
 
         except Exception as e:
