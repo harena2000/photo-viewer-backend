@@ -23,6 +23,8 @@ class ListFiles(APIView):
                     "name": folder.name,
                     "completed": folder.completed,
                     "pan_file": folder.pan_file,
+                    "total_images": folder.total_images,
+                    "total_size": folder.total_size,
                     "created_at": folder.created_at,
                 })
 
