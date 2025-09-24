@@ -31,12 +31,24 @@ def process_folder(folder_path):
     )
 
 
-def start_watching(path_to_watch):
-    for folder_name in os.listdir(path_to_watch):
+def sync_folders(path_to_watch):
+    existing_folder_names = set(os.listdir(path_to_watch))
+    
+    for folder in WatchedFolder.objects.all():
+        if folder.name not in existing_folder_names:
+            folder.delete()
+    
+    for folder_name in existing_folder_names:
         folder_path = os.path.join(path_to_watch, folder_name)
         if os.path.isdir(folder_path):
-            process_folder(folder_path) 
+            process_folder(folder_path)
 
+
+def start_watching(path_to_watch):
+    # --- Step 1: Sync existing folders ---
+    sync_folders(path_to_watch)
+
+    # --- Step 2: Start real-time watcher ---
     event_handler = FolderEventHandler()
     observer = Observer()
     observer.schedule(event_handler, path_to_watch, recursive=False)
