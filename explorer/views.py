@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from environs import Env
 
 import os
 from pathlib import Path
@@ -6,8 +7,10 @@ from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-# Change this to the folder you want to expose
-ROOT_FOLDER = Path("/app/external_project")
+ROOT_FOLDER = Path("/app/project")
+
+env = Env()
+env.read_env()
 
 class ListFiles(APIView):
     def get(self, request):
@@ -17,7 +20,6 @@ class ListFiles(APIView):
         - path: relative path inside ROOT_FOLDER to explore subfolders
         """
         try:
-            # Get relative path from query params, default to ROOT_FOLDER
             relative_path = request.query_params.get("path", "")
             folder_to_list = ROOT_FOLDER / relative_path
             print(folder_to_list)
@@ -34,6 +36,7 @@ class ListFiles(APIView):
 
             return Response({
                 "current_path": str(folder_to_list.relative_to(ROOT_FOLDER)),
+                "full_path": env.str('BACKEND_URL') + settings.MEDIA_URL + str(folder_to_list.relative_to(ROOT_FOLDER)),
                 "files": files
             })
 
