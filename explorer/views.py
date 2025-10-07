@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.core.paginator import Paginator
-from .models import WatchedFolder
+from .models import ProjectFolder
 
 class ListFiles(APIView):
     def get(self, request):
@@ -10,7 +10,7 @@ class ListFiles(APIView):
             page_size = int(request.query_params.get("page_size", 10))
 
             # Query all folders from DB
-            folders = WatchedFolder.objects.all().order_by("name")
+            folders = ProjectFolder.objects.all().order_by("name")
 
             # Pagination
             paginator = Paginator(folders, page_size)
