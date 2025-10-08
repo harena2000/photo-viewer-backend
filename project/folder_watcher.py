@@ -33,55 +33,49 @@ def calculate_folder_stats(folder_path):
     return total_images, total_size
 
 
-def process_folder(folder_path):
-    folder_name = os.path.basename(folder_path)
+def process_folder(project_path):
+    project_name = os.path.basename(project_path)
 
-    if ProjectFolder.objects.filter(name=folder_name).exists():
+    if ProjectFolder.objects.filter(name=project_name).exists():
         return
 
     data_file = None
-    for file in os.listdir(folder_path):
+    for file in os.listdir(project_path):
         ext = os.path.splitext(file)[1].lower()
         if ext in ACCEPTED_DATA_FILES:
-            data_file = os.path.join(folder_path, file)
+            data_file = os.path.join(project_path, file)
             break
 
-    total_images, total_size = calculate_folder_stats(folder_path)
+    total_images, total_size = calculate_folder_stats(project_path)
 
-    print("✅ Processing folder:", folder_name)
-    folder = ProjectFolder.objects.create(
-        name=folder_name,
+    project = ProjectFolder.objects.create(
+        name=project_name,
         completed=bool(data_file),
         total_images=total_images,
         total_size=total_size,
     )
 
-    print("✅ Folder created:", folder)
-
     if data_file:
-        print("✅ Data File:", data_file)
         metadata_list = parse_file(data_file)
-        # print("✅ Metadata List :", metadata_list)
         for meta in metadata_list:
-            # print("✅ Meta : ", meta.get("filename"))
-            ImageMetadata.objects.create(folder=folder, **meta)
+            ImageMetadata.objects.create(project=project, **meta)
 
 
-def sync_folders(path_to_watch):
-    existing_folder_names = set(os.listdir(path_to_watch))
+def sync_project(path_to_watch):
+    existing_project_names = set(os.listdir(path_to_watch))
 
-    for folder in ProjectFolder.objects.all():
-        if folder.name not in existing_folder_names:
-            folder.delete()
+    for project in ProjectFolder.objects.all():
+        if project.name not in existing_project_names:
+            project.delete()
 
-    for folder_name in existing_folder_names:
-        folder_path = os.path.join(path_to_watch, folder_name)
-        if os.path.isdir(folder_path):
-            process_folder(folder_path)
+    for project_name in existing_project_names:
+        project_path = os.path.join(path_to_watch, project_name)
+        if os.path.isdir(project_path):
+            process_folder(project_path)
 
 
 def start_watching(path_to_watch):
-    sync_folders(path_to_watch)
+    sync_project(path_to_watch)
 
     event_handler = FolderEventHandler()
     observer = Observer()
