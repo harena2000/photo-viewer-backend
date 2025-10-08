@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from django.core.paginator import Paginator
 from .models import ProjectFolder
 
-class ListFiles(APIView):
+class ProjectList(APIView):
     def get(self, request):
         try:
             page = int(request.query_params.get("page", 1))

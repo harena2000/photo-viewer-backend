@@ -6,7 +6,7 @@ services:
       - .env
     volumes:
       - .:/app
-      - /home/harena/Documents/Project/Archive:/app/project
+      - /home/harena/Documents/Project/Archive:/app/data
     depends_on:
       - viewer-db
     ports:

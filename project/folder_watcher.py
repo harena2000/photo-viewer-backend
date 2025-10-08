@@ -1,9 +1,8 @@
-# explorer/folder_watcher.py
 import os
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-from explorer.utils.parser import parse_file
+from project.utils.parser import parse_file
 from .models import ImageMetadata, ProjectFolder
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp"}
