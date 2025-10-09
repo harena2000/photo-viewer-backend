@@ -2,6 +2,6 @@ from django.urls import path
 from .views import update_layers, get_layers
 
 urlpatterns = [
-    path("update_layers/", update_layers),
-    path("get_layers/", get_layers),
+    path("update-layers/", update_layers),
+    path("get-layers/", get_layers),
 ]

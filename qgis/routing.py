@@ -1,6 +1,6 @@
-from django.urls import path
-from .consumers import QGISConsumer
+from django.urls import re_path
+from .consumers import QGISLayerConsumer
 
 websocket_urlpatterns = [
-    path("ws/qgis/", QGISConsumer.as_asgi()),
+    re_path(r"^ws/qgis/$", QGISLayerConsumer.as_asgi()),
 ]

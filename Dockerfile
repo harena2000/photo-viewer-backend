@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Install dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt watchdog
+RUN pip install --no-cache-dir -r requirements.txt watchdog daphne channels
 
 
 # Copy project files

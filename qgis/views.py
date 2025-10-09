@@ -8,7 +8,7 @@ latest_layers = []
 def update_layers(request):
     global latest_layers
     latest_layers = request.data.get("layers", [])
-    print("Updated Layers:", latest_layers)
+    print(latest_layers)
     return Response({"status": "ok"})
 
 @api_view(['GET'])
