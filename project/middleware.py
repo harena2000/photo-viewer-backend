@@ -15,7 +15,7 @@ class MediaCacheControlMiddleware:
 
     async def __call__(self, request):
         response = await self.get_response(request)
-        if request.path.startswith("/project/"):
+        if request.path.startswith("/data/"):
             patch_cache_control(response, public=True, max_age=31536000, immutable=True)
             print("MediaCacheControlMiddleware applied")
         return response

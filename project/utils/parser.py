@@ -95,7 +95,7 @@ def parse_file(file_path):
             ts = parse_timestamp_from_filename(filename)
             try:
                 x = float(cols[1]); y = float(cols[2]); z = float(cols[3])
-                roll = float(cols[4]); pitch = float(cols[5]); yaw = float(cols[6])
+                roll = None; pitch = float(cols[5]); yaw = float(cols[6])
             except Exception:
                 continue
 

@@ -20,9 +20,9 @@ class ProjectList(APIView):
             projects_data = []
             for project in paged_projects:
                 projects_data.append({
+                    "id": project.id,
                     "name": project.name,
                     "completed": project.completed,
-                    "project_id": project.id,
                     "total_images": project.total_images,
                     "total_size": project.total_size,
                     "created_at": project.created_at,
@@ -55,18 +55,20 @@ class ImageMetadataList(APIView):
                     {"error": "Missing required parameter: project_id"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+                
+            print("Project ID:", project_id)
 
             try:
                 project = ProjectFolder.objects.get(id=project_id)
+                print("Project:", project)
             except ProjectFolder.DoesNotExist:
                 return Response(
                     {"error": f"WatchedFolder with id={project_id} not found"},
                     status=status.HTTP_404_NOT_FOUND
                 )
 
-            images = ImageMetadata.objects.filter(project=project).order_by("id")
-            images = ImageMetadataList.objects.all().order_by("name")
-
+            images = ImageMetadata.objects.filter(project=project)
+            
             # Pagination
             paginator = Paginator(images, page_size)
             paged_images = paginator.get_page(page)
@@ -81,7 +83,7 @@ class ImageMetadataList(APIView):
                 })
 
             return Response({
-                "projects": images_data,
+                "images": images_data,
                 "pagination": {
                     "page": paged_images.number,
                     "page_size": page_size,
