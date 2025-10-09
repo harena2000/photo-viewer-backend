@@ -25,7 +25,6 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", ["localhost"])
 
 AUTH_USER_MODEL = 'authentification.AppUser'
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -41,7 +40,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
-    "project"
+    "project",
+    "qgis",
 ]
 
 MIDDLEWARE = [
@@ -73,7 +73,13 @@ TEMPLATES = [
     },
 ]
 
+ASGI_APPLICATION = "core.asgi.application"
 WSGI_APPLICATION = 'core.wsgi.application'
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 
 # Database
