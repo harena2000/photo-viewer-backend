@@ -159,12 +159,9 @@ def create_positions_from_pathway(pathway, windows_path, data_file_path):
 
     windows_path = os.path.join(pathway.full_folder_path, pathway.original_file)
     docker_path = windows_to_docker_path(windows_path)
-    print(f"Parsing file: {docker_path}")
 
     try:
-        print(f"Creating positions for pathway '{pathway.name}' from file '{docker_path}'...")
         parsed_positions = parse_file(docker_path)
-        print(f"Parsed {parsed_positions}")
         positions_created = 0
 
         for idx, pos_data in enumerate(parsed_positions, start=1):
@@ -181,12 +178,9 @@ def create_positions_from_pathway(pathway, windows_path, data_file_path):
                 full_folder_path=os.path.join(windows_path, pos_data.get("filename", "")),
             )
             positions_created += 1
-        print("tonga tsara eto")
-
         return {"positions_created": positions_created}
 
     except Exception as e:
-        print(e)
         return {"error": str(e)}
 
 
@@ -233,8 +227,7 @@ def get_project_list(request):
     Returns all projects with their associated pathways.
     """
     try:
-        print("Fetching projects...")
-
+        print("Mandalo ato")
         # Pagination setup
         page = int(request.query_params.get("page", 1))
         page_size = int(request.query_params.get("page_size", 10))
@@ -246,7 +239,7 @@ def get_project_list(request):
         projects_data = []
         for project in paged_projects:
             # Fetch pathways related to this project
-            pathways = Pathway.objects.filter(project=project).order_by("name")
+            pathways = Pathway.objects.filter(project=project).order_by("id").reverse()
 
             # Build pathway list
             pathways_data = [
@@ -270,8 +263,6 @@ def get_project_list(request):
                 "pathways": pathways_data,
             })
             
-        print(f"Returning {projects_data}")
-
         return Response({
             "projects": projects_data,
             "pagination": {

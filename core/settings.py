@@ -195,6 +195,30 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
 
+# LOGGING = {
+#    'version': 1,
+#    'disable_existing_loggers': False,
+#    'handlers': {
+#        'file': {
+#            'level': 'WARNING',
+#            'class': 'logging.FileHandler',
+#            'filename': os.path.join(BASE_DIR, "backend",'debug.log'),
+#        },
+#        'console': {'class': 'logging.StreamHandler'}
+#    },
+#    'loggers': {
+#        'django': {
+#            'handlers': ['file'],
+#            'level': 'WARNING',
+#            'propagate': True,
+#        },
+#    },
+#    'root': {
+#         "handlers": ["console"],
+#         "level": "INFO",
+#     },
+# }
+
 LOGGING = {
     "version": 1,
     'disable_existing_loggers': False,
