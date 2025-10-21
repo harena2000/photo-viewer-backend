@@ -4,6 +4,8 @@ from sys import stdout
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+
+from core import settings
 from .models import Project, Pathway, Position
 from .utils.parser import parse_file
 from django.core.paginator import Paginator
@@ -128,11 +130,7 @@ def create_pathway_from_path(request):
         full_folder_path=windows_path,
     )
 
-    result = create_positions_from_pathway(
-        pathway,
-        windows_path,
-        os.path.join(windows_path, data_file) if data_file else None,
-    )
+    result = create_positions_from_pathway(pathway)
     
     # Now handle the plain result
     if isinstance(result, dict) and "error" in result:
@@ -150,15 +148,15 @@ def create_pathway_from_path(request):
         status=status.HTTP_201_CREATED,
     )
 
-def create_positions_from_pathway(pathway, windows_path, data_file_path):
+def create_positions_from_pathway(pathway):
     if not pathway or not pathway.id:
         return {"error": "Missing 'pathway_id'."}
 
     if not pathway.original_file:
         return {"error": "Pathway has no original file defined."}
 
-    windows_path = os.path.join(pathway.full_folder_path, pathway.original_file)
-    docker_path = windows_to_docker_path(windows_path)
+    pathway_windows_path = os.path.join(pathway.full_folder_path, pathway.original_file)
+    docker_path = windows_to_docker_path(pathway_windows_path)
 
     try:
         parsed_positions = parse_file(docker_path)
@@ -175,7 +173,7 @@ def create_positions_from_pathway(pathway, windows_path, data_file_path):
                 pitch=pos_data.get("pitch"),
                 yaw=pos_data.get("yaw"),
                 filename=pos_data.get("filename", ""),
-                full_folder_path=os.path.join(windows_path, pos_data.get("filename", "")),
+                full_folder_path=os.path.join(pathway.full_folder_path, pos_data.get("filename", "")),
             )
             positions_created += 1
         return {"positions_created": positions_created}
@@ -227,7 +225,6 @@ def get_project_list(request):
     Returns all projects with their associated pathways.
     """
     try:
-        print("Mandalo ato")
         # Pagination setup
         page = int(request.query_params.get("page", 1))
         page_size = int(request.query_params.get("page_size", 10))
@@ -239,7 +236,7 @@ def get_project_list(request):
         projects_data = []
         for project in paged_projects:
             # Fetch pathways related to this project
-            pathways = Pathway.objects.filter(project=project).order_by("id").reverse()
+            pathways = Pathway.objects.filter(project=project).order_by("id")
 
             # Build pathway list
             pathways_data = [
@@ -285,19 +282,13 @@ def get_project_list(request):
 @api_view(["GET"])
 def get_pathways_by_project(request, project_id):
     """
-    GET /api/projects/<project_id>/pathways/?page=1&page_size=10
+    GET /api/projects/<project_id>/pathways
     """
     try:
-        page = int(request.query_params.get("page", 1))
-        page_size = int(request.query_params.get("page_size", 10))
-
-        pathways = Pathway.objects.filter(project_id=project_id).order_by("name")
-
-        paginator = Paginator(pathways, page_size)
-        paged_pathways = paginator.get_page(page)
+        pathways = Pathway.objects.filter(project_id=project_id).order_by("id")
 
         pathways_data = []
-        for pathway in paged_pathways:
+        for pathway in pathways:
             pathways_data.append({
                 "id": pathway.id,
                 "name": pathway.name,
@@ -308,17 +299,7 @@ def get_pathways_by_project(request, project_id):
                 "full_folder_path": pathway.full_folder_path,
             })
 
-        return Response({
-            "pathways": pathways_data,
-            "pagination": {
-                "page": paged_pathways.number,
-                "page_size": page_size,
-                "total_pages": paginator.num_pages,
-                "total_items": paginator.count,
-                "has_next": paged_pathways.has_next(),
-                "has_previous": paged_pathways.has_previous(),
-            }
-        })
+        return Response(pathways_data)
     except Exception as e:
         return Response({"error": str(e)}, status=500)
 
@@ -329,7 +310,7 @@ def get_pathways_by_project(request, project_id):
 @api_view(["GET"])
 def get_positions_by_pathway(request, pathway_id):
     """
-    GET /api/pathways/<pathway_id>/positions/?page=1&page_size=10
+    GET /api/pathway/<pathway_id>/positions/?page=1&page_size=10
     """
     try:
         page = int(request.query_params.get("page", 1))
@@ -342,6 +323,15 @@ def get_positions_by_pathway(request, pathway_id):
 
         positions_data = []
         for pos in paged_positions:
+            docker_path = windows_to_docker_path(pos.full_folder_path)
+
+            # Get only the relative path under MEDIA_ROOT
+            relative_path = os.path.relpath(docker_path, settings.MEDIA_ROOT)
+
+            # Build full URL to access the image
+            image_url = request.build_absolute_uri(
+                os.path.join(settings.MEDIA_URL, relative_path).replace("\\", "/")
+            )
             positions_data.append({
                 "id": pos.id,
                 "number": pos.number,
@@ -351,10 +341,10 @@ def get_positions_by_pathway(request, pathway_id):
                 "roll": pos.roll,
                 "pitch": pos.pitch,
                 "yaw": pos.yaw,
-                "path": pos.path,
-                "full_folder_path": windows_to_docker_path(pos.full_folder_path),
+                "filename": pos.filename,
+                "imageUrl": image_url,
             })
-
+            
         return Response({
             "positions": positions_data,
             "pagination": {

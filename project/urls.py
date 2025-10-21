@@ -15,5 +15,5 @@ urlpatterns = [
     path("pathway/<int:pathway_id>/update-epsg/", update_pathway_epsg, name="update_pathway_epsg"),
     path("list/", get_project_list, name="get_projects"),
     path("<int:project_id>/pathways/", get_pathways_by_project, name="get_pathways_by_project"),
-    path("pathways/<int:pathway_id>/positions/", get_positions_by_pathway, name="get_positions_by_pathway"),
+    path("pathway/<int:pathway_id>/positions/", get_positions_by_pathway, name="get_positions_by_pathway"),
 ]
