@@ -51,24 +51,25 @@ def create_project_from_path(request):
     if not windows_path:
         return Response({"error": "Missing 'filepath'."}, status=400)
 
-    docker_path = windows_to_docker_path(windows_path)
-    if not os.path.exists(docker_path):
-        return Response({"error": f"Path not found: {docker_path}"}, status=404)
-
     match = re.match(
         r"^([A-Z]:)?[\\/]+([^\\/]+)[\\/]+(\d{4})[\\/]+([^\\/]+)[\\/]+([^\\/]+)$",
         windows_path.strip(),
         re.IGNORECASE,
     )
+    
     if not match:
         return Response({"error": "Invalid path format. Expected: P:/<departement>/<year>/<project_number>/<project_name>"},
-                        status=400)
+                        status=401)
+    
+    docker_path = windows_to_docker_path(windows_path)
+    if not os.path.exists(docker_path):
+        return Response({"error": f"Path not found: {docker_path}"}, status=404)
 
     project_number = match.group(4)
     project_name = match.group(5)
 
-    if Project.objects.filter(name=project_name).exists():
-        return Response({"message": f"Project '{project_name}' already exists."}, status=200)
+    if Project.objects.filter(name=project_number).exists():
+        return Response({"message": f"Project '{project_number}' already exists."}, status=500)
 
     project = Project.objects.create(
         number=project_number,

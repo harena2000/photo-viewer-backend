@@ -11,7 +11,9 @@ services:
       - viewer-db
     ports:
       - "8000:8000"
-    command: python manage.py runserver 0.0.0.0:8000
+    entrypoint: ["/entrypoint.sh"]
+    # environment:
+    #   DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:${DB_PORT}/${DB_NAME}
     networks:
       - viewer_network
   

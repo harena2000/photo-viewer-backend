@@ -11,3 +11,5 @@ python-dotenv==1.1.1
 sqlparse==0.5.3
 channels==4.2.0
 channels_redis==4.2.1
+uvicorn==0.38.0
+websockets==15.0.1

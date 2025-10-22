@@ -77,9 +77,12 @@ TEMPLATES = [
 ASGI_APPLICATION = "core.asgi.application"
 WSGI_APPLICATION = 'core.wsgi.application'
 CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
+   'default': {
+       'BACKEND': 'channels_redis.core.RedisChannelLayer',
+       'CONFIG': {
+           "hosts": [('vision-redis', 6379)],
+       },
+   },
 }
 
 

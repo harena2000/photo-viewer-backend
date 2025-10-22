@@ -7,16 +7,18 @@ ENV PYTHONUNBUFFERED=1
 # Set work directory
 WORKDIR /app
 
+# Install bash before running any shell scripts
+RUN apk add --no-cache bash
+
 # Install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-
 # Copy project files
 COPY . .
 
-# Expose port (optional, for debugging)
-EXPOSE 8000
+# Copy and configure entrypoint
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Entrypoint is handled by docker-compose
-CMD ["sleep", "infinity"]
+ENTRYPOINT ["/entrypoint.sh"]
